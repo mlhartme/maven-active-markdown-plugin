@@ -20,11 +20,12 @@ import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.plugin.AbstractMojo;
 import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.Node;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 
 import java.io.IOException;
 
-public abstract class BaseMojo extends AbstractMojo {
+public class BaseMojo extends AbstractMojo {
     protected final World world;
 
     /**
@@ -77,5 +78,14 @@ public abstract class BaseMojo extends AbstractMojo {
 
     public FileNode getFile() {
         return dir.join(name);
+    }
+
+    public void execute() throws MojoExecutionException {
+        try {
+            System.out.println("hi");
+            throw new IOException("test");
+        } catch (IOException e) {
+            throw new MojoExecutionException("cannot generate application: " + e.getMessage(), e);
+        }
     }
 }
