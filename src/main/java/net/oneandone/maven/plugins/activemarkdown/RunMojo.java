@@ -14,78 +14,56 @@
  * You should have received a copy of the GNU General Public License
  * along with maven-application-plugin.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.oneandone.maven.plugins.application;
+package net.oneandone.maven.plugins.activemarkdown;
 
 import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.plugin.AbstractMojo;
 import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.Node;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 import java.io.IOException;
 
-public class BaseMojo extends AbstractMojo {
+/**
+ * Generates an application file. Merges dependency jars into a single file, prepended with a launch shell script.
+ */
+@Mojo(name = "run", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.NONE)
+public class RunMojo extends AbstractMojo {
     protected final World world;
 
     /**
-     * Directory where to place the Launch Script and the executable Jar file.
-     * Usually, there's no need to change the default value, which is target.
+     * Markdown file to process.
      */
-    @Parameter(defaultValue = "${project.build.directory}")
-    protected FileNode dir;
+    @Parameter(defaultValue = "${basedir}/documentation.md")
+    protected String file;
 
     /**
-     * Name for the generated application file.
+     * True to generate man pages.
      */
-    @Parameter(defaultValue = "${project.artifactId}")
-    protected String name;
+    @Parameter(defaultValue = "false")
+    protected boolean man;
 
-    /**
-     * Classifier to deploy application files with.
-     * Specify a different value if you want to deploy multiple applications.
-     */
-    @Parameter(defaultValue = "application")
-    protected String classifier = "";
-
-    /**
-     * Type to deploy application files with.
-     */
-    @Parameter(defaultValue = "sh")
-    protected String type = "";
-
-    /**
-     * Permissions for application file.
-     */
-    @Parameter(defaultValue = "rwxr-xr-x")
-    protected String permissions = "";
-
-    public BaseMojo() throws IOException {
+    public RunMojo() throws IOException {
         this(World.create());
     }
 
-    public BaseMojo(World world) {
+    public RunMojo(World world) {
         this.world = world;
-    }
-
-    public void setDir(String dir) {
-        this.dir = world.file(dir);
-    }
-
-    public Node getDir() {
-        return dir;
-    }
-
-    public FileNode getFile() {
-        return dir.join(name);
     }
 
     public void execute() throws MojoExecutionException {
         try {
-            System.out.println("hi");
-            throw new IOException("test");
+            doExecute();
         } catch (IOException e) {
             throw new MojoExecutionException("cannot generate application: " + e.getMessage(), e);
         }
+    }
+
+    private void doExecute() throws IOException {
+        Markdown.run(world.file(file), null);
     }
 }
