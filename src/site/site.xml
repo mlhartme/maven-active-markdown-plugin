@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="Maven Protocol Plugin">
+  <bannerLeft>
+    <name>Maven Application Plugin</name>
+  </bannerLeft>
+  <bannerRight>
+    <src>http://www1.schlund.de/img-fl/header/logo.gif</src>
+  </bannerRight>
+
+  <body>
+    <menu name="Documentation">
+      <item name="Goals" href="plugin-info.html"/>
+      <item name="Generated" href="index.html"/>
+      <item name="github" href="https://github.com/mlhartme/maven-application-plugin"/>
+    </menu>
+
+    ${reports}
+
+  </body>
+</project>
+  
