@@ -16,10 +16,8 @@
  */
 package net.oneandone.maven.plugins.activemarkdown;
 
-import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.plugin.AbstractMojo;
 import net.oneandone.sushi.fs.World;
-import net.oneandone.sushi.fs.Node;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -31,7 +29,7 @@ import java.io.IOException;
 /**
  * Generates an application file. Merges dependency jars into a single file, prepended with a launch shell script.
  */
-@Mojo(name = "run", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.NONE)
+@Mojo(name = "run", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.NONE)
 public class RunMojo extends AbstractMojo {
     protected final World world;
 
@@ -46,6 +44,12 @@ public class RunMojo extends AbstractMojo {
      */
     @Parameter(defaultValue = "false")
     protected boolean man;
+
+    /**
+     * True to generate man pages.
+     */
+    @Parameter(defaultValue = "${project.build.directory}/man")
+    protected String mandir;
 
     public RunMojo() throws IOException {
         this(World.create());
@@ -64,6 +68,6 @@ public class RunMojo extends AbstractMojo {
     }
 
     private void doExecute() throws IOException {
-        Markdown.run(world.file(file), null);
+        Markdown.run(world.file(file), man ? world.file(mandir) : null);
     }
 }
