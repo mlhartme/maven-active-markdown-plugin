@@ -15,6 +15,7 @@
  */
 package net.oneandone.maven.plugins.activemarkdown;
 
+import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.launcher.Launcher;
 import net.oneandone.sushi.util.Strings;
@@ -22,11 +23,7 @@ import net.oneandone.sushi.util.Strings;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Uses special comments (http://stackoverflow.com/questions/4823468/comments-in-markdown) to implement "markdown actions":
@@ -36,22 +33,17 @@ import java.util.Map;
 public class Markdown {
     public static void run(FileNode file, FileNode man) throws IOException {
         List<String> lines;
-        Map<String, List<String>> variables;
 
         file.checkFile();
         if (man != null) {
             man.mkdirsOpt();
         }
         lines = load(file);
-        variables = new HashMap<>();
-        variables.put("ALL_SYNOPSIS", synopsis(lines));
-        variables.put("date", Arrays.asList(new Date().toString()));
-        lines = substitute(lines, variables);
         checkCrossReferences(lines);
         if (man != null) {
             manpages(lines, man);
         }
-        lines = inlines(lines, variables);
+        lines = actions(file.getWorld(), lines);
         file.writeLines(lines);
     }
 
@@ -135,37 +127,8 @@ public class Markdown {
     }
 
     public static List<String> load(FileNode src) throws IOException {
-        List<String> result;
-        List<FileNode> stack;
-
-        result = new ArrayList<>();
-        stack = new ArrayList<>();
-        load(src, stack, result);
-        if (!stack.isEmpty()) {
-            throw new IllegalStateException();
-        }
-        return result;
-    }
-
-    public static void load(FileNode src, List<FileNode> stack, List<String> result) throws IOException {
-        String name;
-
         src.checkFile();
-        if (stack.contains(src)) {
-            throw new IOException("circular includes: " + stack);
-        }
-        stack.add(src);
-        for (String line : src.readLines()) {
-            if (line.startsWith("!INCLUDE ")) {
-                name = line.substring(9);
-                name = Strings.removeLeft(name, "\"");
-                name = Strings.removeRight(name, "\"");
-                load(src.getParent().join(name), stack, result);
-            } else {
-                result.add(line);
-            }
-        }
-        stack.remove(stack.size() - 1);
+        return src.readLines();
     }
 
     private static List<String> synopsis(List<String> lines) {
@@ -188,30 +151,11 @@ public class Markdown {
         return result;
     }
 
-    private static List<String> substitute(List<String> lines, Map<String, List<String>> variables) throws IOException {
-        List<String> result;
-        List<String> l;
-
-        result = new ArrayList<>(lines.size());
-        for (String line : lines) {
-            if (line.startsWith("%")) {
-                l = variables.get(line.substring(1));
-                if (l == null) {
-                    throw new IOException("not found: " + line);
-                }
-                result.addAll(l);
-            } else {
-                result.add(line);
-            }
-        }
-        return result;
-    }
-
-    private static List<String> inlines(List<String> lines, Map<String, List<String>> variables) throws IOException {
+    private static List<String> actions(World world, List<String> lines) throws IOException {
         String startLine;
         String endLine;
         List<String> result;
-        String key;
+        String code;
         List<String> value;
         int next;
 
@@ -219,18 +163,21 @@ public class Markdown {
         for (int i = 0; i < lines.size(); i++) {
             startLine = lines.get(i);
             if (isAction(startLine)) {
-                key = getActionCode(startLine);
-                value = variables.get(key);
-                if (value == null) {
-                    throw new IOException("not found: " + key);
+                code = getActionCode(startLine);
+                if ("ALL_SYNOPSIS".equals(code)) {
+                    value = synopsis(lines);
+                } else if (code.startsWith("include ")) {
+                    value = load(world.file(code.substring(8)));
+                } else {
+                    throw new IOException("not found: " + code);
                 }
                 next = nextAction(lines, i + 1);
                 if (next == -1) {
-                    throw new IOException("missing end marker for action " + key);
+                    throw new IOException("missing end marker for action " + code);
                 }
                 endLine = lines.get(next);
                 if (!"-".equals(getActionCode(endLine))) {
-                    throw new IOException("unexpected end marker for action " + key + ": " + getActionCode(endLine));
+                    throw new IOException("unexpected end marker for action " + code + ": " + getActionCode(endLine));
                 }
                 result.add(startLine);
                 result.addAll(value);
