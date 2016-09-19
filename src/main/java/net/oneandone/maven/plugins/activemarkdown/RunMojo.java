@@ -16,8 +16,9 @@
  */
 package net.oneandone.maven.plugins.activemarkdown;
 
-import org.apache.maven.plugin.AbstractMojo;
 import net.oneandone.sushi.fs.World;
+import net.oneandone.sushi.fs.file.FileNode;
+import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -68,6 +69,12 @@ public class RunMojo extends AbstractMojo {
     }
 
     private void doExecute() throws IOException {
-        Markdown.run(world.file(file), man ? world.file(mandir) : null);
+        FileNode m;
+        FileNode f;
+
+        m = man ? world.file(mandir) : null;
+        f = world.file(file);
+        world.setWorking(f.getParent());
+        Markdown.run(f, m);
     }
 }
