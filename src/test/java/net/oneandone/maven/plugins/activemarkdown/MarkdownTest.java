@@ -17,12 +17,36 @@ public class MarkdownTest {
         check("", "");
     }
 
+    @Test
+    public void allSynopsis() throws IOException {
+        check(l("[//]: # (ALL_SYNOPSIS)",
+                "[//]: # (-)",
+                "blink"
+                ),
+              l("[//]: # (ALL_SYNOPSIS)",
+                "blub",
+                "[//]: # (-)",
+                      "blink")
+                );
+    }
+
+    private static String l(String ... lines) {
+        StringBuilder builder;
+
+        builder = new StringBuilder();
+        for (String line : lines) {
+            builder.append(line);
+            builder.append('\n');
+        }
+        return builder.toString();
+    }
+
     private void check(String expected, String actual) throws IOException {
         FileNode file;
 
         file = WORLD.getTemp().createTempFile();
         file.writeString(actual);
         Markdown.run(file, null);
-        assertEquals(expected, actual);
+        assertEquals(expected, file.readString());
     }
 }
