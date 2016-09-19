@@ -21,7 +21,6 @@ import net.oneandone.sushi.launcher.Launcher;
 import net.oneandone.sushi.util.Strings;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,11 +39,11 @@ public class Markdown {
         }
         lines = load(file);
         checkCrossReferences(lines);
+        lines = actions(file.getWorld(), lines);
+        file.writeLines(lines);
         if (man != null) {
             manpages(lines, man);
         }
-        lines = actions(file.getWorld(), lines);
-        file.writeLines(lines);
     }
 
     private static void checkCrossReferences(List<String> lines) throws IOException {
@@ -90,28 +89,13 @@ public class Markdown {
     }
 
     private static void manpages(List<String> lines, FileNode dir) throws IOException {
-        String lastContent;
-        Manpage manpage;
         FileNode roff;
         Launcher launcher;
         List<FileNode> ronns;
 
-        lastContent = null;
-        manpage = null;
-        for (String line : lines) {
-            if (manpage == null) {
-                manpage = Manpage.start(dir, line, lastContent);
-            } else {
-                manpage = manpage.end(line);
-            }
-            if (manpage != null) {
-                manpage.line(line);
-            }
-            if (!line.isEmpty()) {
-                lastContent = line;
-            }
+        for (int i = 0; i < lines.size(); i++) {
+            Manpage.check(dir, lines, i);
         }
-        System.out.println("dir: " + dir.getAbsolute());
         ronns = dir.find("*.ronn");
         launcher = dir.launcher("ronn", "--roff");
         for (FileNode file :ronns) {
@@ -212,7 +196,7 @@ public class Markdown {
         return line.substring(start.length(), line.length() - 1);
     }
 
-    private static int depth(String header) {
+    static int depth(String header) {
         int count;
 
         count = 0;
@@ -225,78 +209,12 @@ public class Markdown {
         return count;
     }
 
-    private static String trimHeader(String header) {
+    static String trimHeader(String header) {
         return header.substring(depth(header)).trim();
     }
 
-    private static boolean isSynopsis(String line) {
+    public static boolean isSynopsis(String line) {
         return line.endsWith("# SYNOPSIS");
     }
 
-    public static class Manpage {
-        public static Manpage start(FileNode dir, String line, String lastContent) throws IOException {
-            int depth;
-            int idx;
-            String name;
-            Writer dest;
-            Manpage result;
-            FileNode ronn;
-
-            if (!isSynopsis(line)) {
-                return null;
-            }
-            if (lastContent == null) {
-                throw new IOException("missing man header for line:" + line);
-            }
-            depth = depth(line) - 1;
-            if (depth(lastContent) != depth) {
-                throw new IOException("nesting error:" + lastContent + " vs " + line);
-            }
-            idx = lastContent.indexOf(" -- ");
-            if (idx == -1) {
-                throw new IOException("missing separator: " + lastContent);
-            }
-            name = trimHeader(lastContent.substring(0, idx));
-            ronn = dir.join(name + ".1.ronn");
-            dest = ronn.newWriter();
-            result = new Manpage(depth, ronn, dest);
-            result.line(lastContent);
-            result.line();
-            return result;
-        }
-
-        private final int depth;
-        private final FileNode file;
-        private final Writer dest;
-
-        public Manpage(int depth, FileNode file, Writer dest) {
-            this.depth = depth;
-            this.file = file;
-            this.dest = dest;
-        }
-
-        public void line() throws IOException {
-            line("");
-        }
-
-        public void line(String line) throws IOException {
-            int count;
-
-            count = Markdown.depth(line);
-            if (count > 0) {
-                line = line.substring(depth - 1);
-            }
-            dest.write(line);
-            dest.write('\n');
-        }
-
-        public Manpage end(String line) throws IOException {
-            if (line.startsWith("#") && depth(line) <= depth) {
-                dest.close();
-                return null;
-            } else {
-                return this;
-            }
-        }
-    }
 }

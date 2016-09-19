@@ -1,14 +1,16 @@
-### stool -- Stage tool
+### stool
+
+Stage tool
+
+#### SYNOPSIS
 
 [//]: # (ALL_SYNOPSIS)
 [//]: # (-)
 
-#### SYNOPSIS
 
-`stool`
+### stool-import
 
-
-### stool-import -- Create stages for one or many existing directories
+Create stages for one or many existing directories
 
 #### SYNOPSIS
 
@@ -26,7 +28,9 @@ is a string defining the stage name. And any occurrence of `%d`
 will be replaced by the current directory name. Default template is`%d`.
 
 
-### stool-select -- Jump between stage directories
+### stool-select
+
+Jump between stage directories
 
 #### SYNOPSIS
 
