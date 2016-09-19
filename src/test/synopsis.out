@@ -1,0 +1,59 @@
+### stool -- Stage tool
+
+[//]: # (ALL_SYNOPSIS)
+
+`stool`
+
+
+
+`stool` *global-option*... `import` [`-max`] [`-name` *template*] *directory* ...
+
+
+
+`stool` *global-option*... `select` *stage*|`none`
+
+
+[//]: # (-)
+
+#### SYNOPSIS
+
+`stool`
+
+
+### stool-import -- Create stages for one or many existing directories
+
+#### SYNOPSIS
+
+`stool` *global-option*... `import` [`-max`] [`-name` *template*] *directory* ...
+
+
+#### DESCRIPTION
+
+Scans *directory* for stage candidates and offers to import them. The candidates you
+select will be imported, i.e. a backstage directory for the stage directory is created. If the scan only
+yields a single candidate, it will be imported and selected without additional interaction.
+
+*template*
+is a string defining the stage name. And any occurrence of `%d`
+will be replaced by the current directory name. Default template is`%d`.
+
+
+### stool-select -- Jump between stage directories
+
+#### SYNOPSIS
+
+`stool` *global-option*... `select` *stage*|`none`
+
+
+#### DESCRIPTION
+
+Prints the selected stage when called without argument.
+
+Otherwise cds to the stage directory of the specified *stage*.
+
+When called with `none`: cds to the parent directory of the current stage.
+
+If the specified stage is not found, the command prints an error message and lists stages that
+you could have meant. If you also specified the `-fuzzy` option and there's only a
+single candidate, this stage will be selected.
+

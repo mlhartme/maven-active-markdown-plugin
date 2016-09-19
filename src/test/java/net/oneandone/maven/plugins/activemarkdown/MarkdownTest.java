@@ -18,7 +18,7 @@ public class MarkdownTest {
     }
 
     @Test
-    public void allSynopsis() throws IOException {
+    public void synopsisEmpty() throws IOException {
         check(l("[//]: # (ALL_SYNOPSIS)",
                 "[//]: # (-)",
                 "blink"
@@ -30,6 +30,11 @@ public class MarkdownTest {
                 );
     }
 
+    @Test
+    public void synopsis() throws IOException {
+        checkFile("synopsis");
+    }
+
     private static String l(String ... lines) {
         StringBuilder builder;
 
@@ -39,6 +44,15 @@ public class MarkdownTest {
             builder.append('\n');
         }
         return builder.toString();
+    }
+
+    private void checkFile(String name) throws IOException {
+        FileNode in;
+        FileNode out;
+
+        in = WORLD.guessProjectHome(getClass()).join("src/test", name + ".in");
+        out = in.getParent().join(name + ".out");
+        check(out.readString(), in.readString());
     }
 
     private void check(String expected, String actual) throws IOException {
