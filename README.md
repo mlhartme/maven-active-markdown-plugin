@@ -2,7 +2,7 @@
 
 This is a Maven Plugin for Markdown files. It provides
 * *actions* that to generate parts of the markdown file
-* *man pages* generation
+* *man pages* generation with [https://github.com/rtomayko/ronn](Ronn)
 * error message to dangling references
 
 
