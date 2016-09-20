@@ -71,10 +71,15 @@ public class RunMojo extends AbstractMojo {
     private void doExecute() throws IOException {
         FileNode m;
         FileNode f;
+        Markdown md;
 
         m = man ? world.file(mandir) : null;
         f = world.file(file);
         world.setWorking(f.getParent());
-        Markdown.run(f, m);
+        md = Markdown.run(f);
+        if (m != null) {
+            m.mkdirsOpt();
+            getLog().debug(md.manpages(m));
+        }
     }
 }

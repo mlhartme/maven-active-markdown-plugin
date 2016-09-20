@@ -25,20 +25,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Markdown {
-    public static void run(FileNode file, FileNode man) throws IOException {
+    public static Markdown run(FileNode file) throws IOException {
         Markdown md;
 
         file.checkFile();
-        if (man != null) {
-            man.mkdirsOpt();
-        }
         md = load(file);
         md.checkCrossReferences();
         md.actions(file.getWorld());
         file.writeLines(md.lines);
-        if (man != null) {
-            md.manpages(man);
-        }
+        return md;
     }
 
     public static Markdown load(FileNode src) throws IOException {
@@ -101,11 +96,12 @@ public class Markdown {
         return str.replace(' ', '-');
     }
 
-    public void manpages(FileNode dir) throws IOException {
+    public String manpages(FileNode dir) throws IOException {
         List<Manpage> lst;
         Manpage p;
         FileNode roff;
         Launcher launcher;
+        String result;
 
         lst = new ArrayList<>();
         for (int i = 0; i < lines.size(); i++) {
@@ -118,13 +114,14 @@ public class Markdown {
         for (Manpage mp : lst) {
             launcher.arg(mp.file.getName());
         }
-        System.out.println(launcher.exec());
+        result = launcher.exec();
         for (Manpage mp : lst) {
             mp.file.deleteFile();
             roff = mp.file.getParent().join(Strings.removeRight(mp.file.getName(), ".ronn"));
             roff.gzip(roff.getParent().join(roff.getName() + ".gz"));
             roff.deleteFile();
         }
+        return result;
     }
 
     private List<String> synopsis() {

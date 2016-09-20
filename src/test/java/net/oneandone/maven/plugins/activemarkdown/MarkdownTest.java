@@ -60,7 +60,7 @@ public class MarkdownTest {
 
         file = WORLD.getTemp().createTempFile();
         file.writeString(actual);
-        Markdown.run(file, null);
+        Markdown.run(file);
         assertEquals(expected, file.readString());
     }
 }

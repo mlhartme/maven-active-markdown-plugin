@@ -17,7 +17,6 @@ public class ManTest {
         in = WORLD.guessProjectHome(getClass()).join("src/test/synopsis.in");
         file = WORLD.getTemp().createTempFile();
         file.writeString(in.readString());
-        Markdown.run(file, WORLD.getTemp().createTempDirectory());
-        System.out.println("done");
+        Markdown.run(file).manpages(WORLD.getTemp().createTempDirectory());
     }
 }
