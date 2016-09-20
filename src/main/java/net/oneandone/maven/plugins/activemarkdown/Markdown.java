@@ -28,9 +28,7 @@ public class Markdown {
     public static Markdown run(FileNode file) throws IOException {
         Markdown md;
 
-        file.checkFile();
         md = load(file);
-        md.checkCrossReferences();
         md.actions(file.getWorld());
         file.writeLines(md.lines);
         return md;
@@ -54,15 +52,17 @@ public class Markdown {
         this.lines = new ArrayList<>();
     }
 
-    public void checkCrossReferences() throws IOException {
+    public List<String> checkCrossReferences() throws IOException {
         List<String> labels;
         int depth;
         int start;
         int end;
         int last;
         String l;
+        List<String> broken;
 
         labels = new ArrayList<>();
+        broken = new ArrayList<>();
         for (String line : lines) {
             depth = depth(line);
             if (depth > 0) {
@@ -83,11 +83,12 @@ public class Markdown {
                 }
                 l = line.substring(start, end);
                 if (!labels.contains(l)) {
-                    System.out.println("cross reference not found: " + l);
+                    broken.add(l);
                 }
                 last = end + 1;
             }
         }
+        return broken;
     }
 
     private static String toLabel(String str) {

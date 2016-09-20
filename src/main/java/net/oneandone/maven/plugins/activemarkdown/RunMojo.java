@@ -72,11 +72,20 @@ public class RunMojo extends AbstractMojo {
         FileNode m;
         FileNode f;
         Markdown md;
+        boolean problem;
 
         m = man ? world.file(mandir) : null;
         f = world.file(file);
         world.setWorking(f.getParent());
         md = Markdown.run(f);
+        problem = false;
+        for (String broken : md.checkCrossReferences()) {
+            getLog().error("broken reference: " + broken);
+            problem = true;
+        }
+        if (problem) {
+            throw new IOException("broken references in markdown file. See above messages for details");
+        }
         if (m != null) {
             m.mkdirsOpt();
             getLog().debug(md.manpages(m));
