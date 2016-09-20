@@ -128,7 +128,12 @@ public class Markdown {
                 collect = isSynopsis(line);
             } else {
                 if (collect) {
-                    result.add(line);
+                    if (isAction(line)) {
+                        // TODO
+                        // this is to skip recursive ALL_SYNOPSIS, but it actually skips all actions
+                    } else {
+                        result.add(line);
+                    }
                 }
             }
         }
