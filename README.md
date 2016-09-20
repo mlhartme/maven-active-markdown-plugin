@@ -10,11 +10,11 @@ This is a Maven Plugin for Markdown files. It provides
 
 An action has a header
 
-  [//]: (code for this header)
+    [//]: (code for this header)
   
 and a footer
 
-  [//]: (-)
+    [//]: (-)
   
 Everything in between is the body of the action. Running the plugin changes the body.
 
@@ -46,8 +46,8 @@ replaces it's body with the specified file.
 
 The action
 
-   [//]: (ALL_SYNOPSIS)
-   [//]: (-)
+    [//]: (ALL_SYNOPSIS)
+    [//]: (-)
    
 collects all =SYNOPSIS= sections in the document and places the in the body.
     
