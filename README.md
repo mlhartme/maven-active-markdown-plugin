@@ -25,7 +25,7 @@ that needs generation: you can continue to directly edit the markdown file, you 
 But you can run the plugin, to update generated stuff.
 
 The mechanism for actions is similar to SVN keywords - a part of the document is modified. However, it's more 
-verbose then a keyword because comments in Markdown a clumsy.
+verbose then a keyword because comments in Markdown a clumsy. See http://stackoverflow.com/questions/4823468/comments-in-markdown.
 
 
 ### Include actions

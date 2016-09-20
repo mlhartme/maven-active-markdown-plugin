@@ -47,7 +47,7 @@ public class Manpage {
     private final String title;
     private final List<String> body;
     private final int depth;
-    private final FileNode file;
+    public final FileNode file;
 
     public Manpage(String title, int depth, FileNode file) {
         this.title = title;

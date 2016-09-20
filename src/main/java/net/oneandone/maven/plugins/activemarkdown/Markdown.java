@@ -24,29 +24,42 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Uses special comments (http://stackoverflow.com/questions/4823468/comments-in-markdown) to implement "markdown actions":
- * [//] # (some code)     is an action header
- * [//] # (-)             is an action footer
- */
 public class Markdown {
     public static void run(FileNode file, FileNode man) throws IOException {
-        List<String> lines;
+        Markdown md;
 
         file.checkFile();
         if (man != null) {
             man.mkdirsOpt();
         }
-        lines = load(file);
-        checkCrossReferences(lines);
-        lines = actions(file.getWorld(), lines);
-        file.writeLines(lines);
+        md = load(file);
+        md.checkCrossReferences();
+        md.actions(file.getWorld());
+        file.writeLines(md.lines);
         if (man != null) {
-            manpages(lines, man);
+            md.manpages(man);
         }
     }
 
-    private static void checkCrossReferences(List<String> lines) throws IOException {
+    public static Markdown load(FileNode src) throws IOException {
+        Markdown result;
+
+        src.checkFile();
+        result = new Markdown();
+        result.lines.addAll(src.readLines());
+        return result;
+    }
+
+
+    //--
+
+    private final List<String> lines;
+
+    public Markdown() {
+        this.lines = new ArrayList<>();
+    }
+
+    public void checkCrossReferences() throws IOException {
         List<String> labels;
         int depth;
         int start;
@@ -88,34 +101,33 @@ public class Markdown {
         return str.replace(' ', '-');
     }
 
-    private static void manpages(List<String> lines, FileNode dir) throws IOException {
+    public void manpages(FileNode dir) throws IOException {
+        List<Manpage> lst;
+        Manpage p;
         FileNode roff;
         Launcher launcher;
-        List<FileNode> ronns;
 
+        lst = new ArrayList<>();
         for (int i = 0; i < lines.size(); i++) {
-            Manpage.check(dir, lines, i);
+            p = Manpage.check(dir, lines, i);
+            if (p != null) {
+                lst.add(p);
+            }
         }
-        ronns = dir.find("*.ronn");
         launcher = dir.launcher("ronn", "--roff");
-        for (FileNode file :ronns) {
-            launcher.arg(file.getName());
+        for (Manpage mp : lst) {
+            launcher.arg(mp.file.getName());
         }
         System.out.println(launcher.exec());
-        for (FileNode file : ronns) {
-            file.deleteFile();
-            roff = file.getParent().join(Strings.removeRight(file.getName(), ".ronn"));
+        for (Manpage mp : lst) {
+            mp.file.deleteFile();
+            roff = mp.file.getParent().join(Strings.removeRight(mp.file.getName(), ".ronn"));
             roff.gzip(roff.getParent().join(roff.getName() + ".gz"));
             roff.deleteFile();
         }
     }
 
-    public static List<String> load(FileNode src) throws IOException {
-        src.checkFile();
-        return src.readLines();
-    }
-
-    private static List<String> synopsis(List<String> lines) {
+    private List<String> synopsis() {
         int count;
         boolean collect;
         List<String> result;
@@ -140,7 +152,7 @@ public class Markdown {
         return result;
     }
 
-    private static List<String> actions(World world, List<String> lines) throws IOException {
+    private void actions(World world) throws IOException {
         String startLine;
         String endLine;
         List<String> result;
@@ -154,9 +166,9 @@ public class Markdown {
             if (isAction(startLine)) {
                 code = getActionCode(startLine);
                 if ("ALL_SYNOPSIS".equals(code)) {
-                    value = synopsis(lines);
+                    value = synopsis();
                 } else if (code.startsWith("include ")) {
-                    value = load(world.file(code.substring(8)));
+                    value = world.file(code.substring(8)).checkFile().readLines();
                 } else {
                     throw new IOException("not found: " + code);
                 }
@@ -176,7 +188,8 @@ public class Markdown {
                 result.add(startLine);
             }
         }
-        return result;
+        lines.clear();
+        lines.addAll(result);
     }
 
     private static int nextAction(List<String> lines, int start) {
