@@ -28,6 +28,7 @@ public class Manpage {
                 if (Markdown.depth(line) - 1 != depth) {
                     throw new IOException("nesting error");
                 }
+                header = header.substring(depth - 1);
                 name = Markdown.trimHeader(header);
                 ronn = dir.join(name + ".1.ronn");
                 result = new Manpage(header, depth, ronn);
@@ -56,9 +57,15 @@ public class Manpage {
     }
 
     public boolean add(String line) throws IOException {
-        if (line.startsWith("#") && Markdown.depth(line) <= depth) {
+        int d;
+
+        d = Markdown.depth(line);
+        if (d > 0 && d <= depth) {
             return false;
         } else {
+            if (d > 0) {
+                line = line.substring(depth - 1);
+            }
             body.add(line);
             return true;
         }
