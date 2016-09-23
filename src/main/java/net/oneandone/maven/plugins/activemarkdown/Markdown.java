@@ -19,6 +19,7 @@ package net.oneandone.maven.plugins.activemarkdown;
 
 import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
+import net.oneandone.sushi.launcher.ExitCode;
 import net.oneandone.sushi.launcher.Launcher;
 import net.oneandone.sushi.util.Strings;
 
@@ -105,6 +106,7 @@ public class Markdown {
         FileNode roff;
         Launcher launcher;
         String result;
+        String ronn;
 
         lst = new ArrayList<>();
         for (int i = 0; i < lines.size(); i++) {
@@ -113,7 +115,12 @@ public class Markdown {
                 lst.add(p);
             }
         }
-        launcher = dir.launcher("ronn", "--roff");
+        try {
+            ronn = dir.exec("which", "ronn").trim();
+        } catch (ExitCode e) {
+            throw new IOException("cannot locate 'ronn', please install it: https://github.com/rtomayko/ronn/blob/master/INSTALLING");
+        }
+        launcher = dir.launcher(ronn, "--roff");
         for (Manpage mp : lst) {
             launcher.arg(mp.file.getName());
         }
