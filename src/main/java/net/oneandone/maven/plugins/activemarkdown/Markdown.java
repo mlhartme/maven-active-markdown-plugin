@@ -118,7 +118,7 @@ public class Markdown {
         try {
             pandoc = dir.exec("which", "pandoc").trim();
         } catch (ExitCode e) {
-            throw new IOException("cannot locate 'ronn', please install it: https://github.com/rtomayko/ronn/blob/master/INSTALLING");
+            throw new IOException("cannot locate 'pandoc', please install it: https://pandoc.org/installing.html");
         }
         output = new StringBuilder();
         for (Manpage mp : lst) {
