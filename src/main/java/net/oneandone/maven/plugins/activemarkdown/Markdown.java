@@ -105,8 +105,8 @@ public class Markdown {
         Manpage p;
         FileNode roff;
         Launcher launcher;
-        String result;
-        String ronn;
+        String pandoc;
+        StringBuilder output;
 
         lst = new ArrayList<>();
         for (int i = 0; i < lines.size(); i++) {
@@ -116,22 +116,23 @@ public class Markdown {
             }
         }
         try {
-            ronn = dir.exec("which", "ronn").trim();
+            pandoc = dir.exec("which", "pandoc").trim();
         } catch (ExitCode e) {
             throw new IOException("cannot locate 'ronn', please install it: https://github.com/rtomayko/ronn/blob/master/INSTALLING");
         }
-        launcher = dir.launcher(ronn, "--roff");
+        output = new StringBuilder();
         for (Manpage mp : lst) {
+            roff = mp.file.getParent().join(Strings.removeRight(mp.file.getName(), ".md"));
+            launcher = dir.launcher(pandoc, "-s", "-t", "man" /* TODO: enable when duplicate link reference is solved: , "--fail-if-warnings" */);
             launcher.arg(mp.file.getName());
-        }
-        result = launcher.exec();
-        for (Manpage mp : lst) {
+            launcher.arg("-o", roff.getAbsolute());
+            output.append(launcher);
+            output.append(launcher.exec());
             mp.file.deleteFile();
-            roff = mp.file.getParent().join(Strings.removeRight(mp.file.getName(), ".ronn"));
             roff.gzip(roff.getParent().join(roff.getName() + ".gz"));
             roff.deleteFile();
         }
-        return result;
+        return output.toString();
     }
 
     private List<String> synopsis() {

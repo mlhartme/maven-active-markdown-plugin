@@ -31,7 +31,6 @@ public class Manpage {
         String line;
         int depth;
         String name;
-        FileNode ronn;
         Manpage result;
 
         line = lines.get(current);
@@ -47,8 +46,7 @@ public class Manpage {
                 }
                 header = header.substring(depth - 1);
                 name = Markdown.trimHeader(header);
-                ronn = dir.join(name + ".1.ronn");
-                result = new Manpage(header, depth, ronn);
+                result = new Manpage(header, depth, dir.join(name + ".md"));
                 for (int i = start + 1; i < lines.size(); i++) {
                     if (!result.add(lines.get(i))) {
                         break;
