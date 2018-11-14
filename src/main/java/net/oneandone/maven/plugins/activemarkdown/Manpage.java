@@ -71,7 +71,7 @@ public class Manpage {
         this.file = file;
     }
 
-    public boolean add(String line) throws IOException {
+    public boolean add(String line) {
         int d;
 
         d = Markdown.depth(line);

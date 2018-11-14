@@ -24,7 +24,9 @@ import net.oneandone.sushi.launcher.Launcher;
 import net.oneandone.sushi.util.Strings;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class Markdown {
@@ -100,6 +102,8 @@ public class Markdown {
         return str.replace(' ', '-');
     }
 
+    private static final SimpleDateFormat FMT = new SimpleDateFormat("LLLLLLLLLLLL yyyy");
+
     public String manpages(FileNode dir) throws IOException {
         List<Manpage> lst;
         Manpage p;
@@ -126,6 +130,9 @@ public class Markdown {
             launcher = dir.launcher(pandoc, "-s", "-t", "man" /* TODO: enable when duplicate link reference is solved: , "--fail-if-warnings" */);
             launcher.arg(mp.file.getName());
             launcher.arg("-o", roff.getAbsolute());
+            launcher.arg("--variable", "title=" + roff.getName().toUpperCase());
+            launcher.arg("--variable", "section=1");
+            launcher.arg("--variable", "date=" + FMT.format(new Date()));
             output.append(launcher);
             output.append(launcher.exec());
             mp.file.deleteFile();
