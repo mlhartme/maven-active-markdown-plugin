@@ -2,6 +2,7 @@
 
 ## 1.0.1 (pending) 
 
+* update lazy-foss-parent 1.0.1 to 1.0.4
 * switch to Pandoc 
 
 
