@@ -2,7 +2,7 @@
 
 This is a Maven Plugin for Markdown files. It provides
 * *actions* that to generate parts of the markdown file
-* *man pages* generation with [https://pandoc.org/](Pandoc)
+* *man pages* generation with [Pandoc](https://pandoc.org/)
 * error message to dangling references
 
 
