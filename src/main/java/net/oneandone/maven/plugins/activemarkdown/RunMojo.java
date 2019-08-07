@@ -74,11 +74,14 @@ public class RunMojo extends AbstractMojo {
         FileNode f;
         Markdown md;
         boolean problem;
+        Ronn ronn;
 
         m = man ? world.file(mandir) : null;
         f = world.file(file);
         world.setWorking(f.getParent());
-        md = Markdown.run(f);
+        ronn = Ronn.probe(world);
+        getLog().info("docker ronn: " + ronn.docker);
+        md = Markdown.run(ronn, f);
         problem = false;
         for (String broken : md.checkCrossReferences()) {
             getLog().error("broken reference: " + broken);

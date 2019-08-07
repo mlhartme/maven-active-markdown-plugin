@@ -77,7 +77,7 @@ public class MarkdownTest {
 
         file = WORLD.getTemp().createTempFile();
         file.writeString(actual);
-        Markdown.run(file);
+        Markdown.run(Ronn.probe(WORLD), file);
         assertEquals(expected, file.readString());
     }
 }

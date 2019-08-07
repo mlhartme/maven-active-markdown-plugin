@@ -37,6 +37,6 @@ public class ManTest {
         work = WORLD.guessProjectHome(getClass()).join("target/man-test").deleteTreeOpt().mkdir();
         file = work.join("file");
         in.copyFile(file);
-        Markdown.run(file).manpages(work.join("dir").mkdir());
+        Markdown.run(Ronn.probe(WORLD), file).manpages(work.join("dir").mkdir());
     }
 }

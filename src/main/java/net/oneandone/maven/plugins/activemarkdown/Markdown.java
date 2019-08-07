@@ -19,7 +19,6 @@ package net.oneandone.maven.plugins.activemarkdown;
 
 import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
-import net.oneandone.sushi.launcher.Launcher;
 import net.oneandone.sushi.util.Strings;
 
 import java.io.IOException;
@@ -27,20 +26,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Markdown {
-    public static Markdown run(FileNode file) throws IOException {
+    public static Markdown run(Ronn ronn, FileNode file) throws IOException {
         Markdown md;
 
-        md = load(file);
+        md = load(ronn, file);
         md.actions(file.getWorld());
         file.writeLines(md.lines);
         return md;
     }
 
-    public static Markdown load(FileNode src) throws IOException {
+    public static Markdown load(Ronn ronn, FileNode src) throws IOException {
         Markdown result;
 
         src.checkFile();
-        result = new Markdown();
+        result = new Markdown(ronn);
         result.lines.addAll(src.readLines());
         return result;
     }
@@ -48,9 +47,11 @@ public class Markdown {
 
     //--
 
+    private final Ronn ronn;
     private final List<String> lines;
 
-    public Markdown() {
+    public Markdown(Ronn ronn) {
+        this.ronn = ronn;
         this.lines = new ArrayList<>();
     }
 
@@ -103,7 +104,6 @@ public class Markdown {
         List<Manpage> lst;
         Manpage p;
         FileNode roff;
-        Launcher launcher;
         String result;
 
         lst = new ArrayList<>();
@@ -113,11 +113,7 @@ public class Markdown {
                 lst.add(p);
             }
         }
-        launcher = ronn(dir);
-        for (Manpage mp : lst) {
-            launcher.arg(mp.file.getName());
-        }
-        result = launcher.exec();
+        result = ronn.run(dir, lst);
         for (Manpage mp : lst) {
             mp.file.deleteFile();
             roff = mp.file.getParent().join(Strings.removeRight(mp.file.getName(), ".ronn"));
@@ -125,33 +121,6 @@ public class Markdown {
             roff.deleteFile();
         }
         return result;
-    }
-
-    private Launcher ronn(FileNode dir) {
-        if (System.getProperty("ronn.local") != null) {
-            return localRonn(dir);
-        } else {
-            return dockerRonn(dir);
-        }
-    }
-
-    private Launcher dockerRonn(FileNode dir) {
-        Launcher launcher;
-
-        launcher = dir.launcher("docker", "run", "--rm", "-i");
-        launcher.arg("--mount", "type=bind,source=" + dir.getAbsolute() + ",dst=" + dir.getAbsolute());
-        launcher.arg("--workdir", dir.getAbsolute());
-        launcher.arg("mlhartme/active-markdown-ronn:1.0.0");
-        launcher.arg("ronn", "--roff");
-        System.out.println("launcher: " + launcher);
-        return launcher;
-    }
-
-    private Launcher localRonn(FileNode dir) {
-        Launcher launcher;
-
-        launcher = dir.launcher("ronn", "--roff");
-        return launcher;
     }
 
     private List<String> synopsis() {
