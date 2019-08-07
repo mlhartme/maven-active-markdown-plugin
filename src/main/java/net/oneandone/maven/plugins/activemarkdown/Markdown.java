@@ -234,5 +234,4 @@ public class Markdown {
     public static boolean isSynopsis(String line) {
         return line.endsWith("# SYNOPSIS");
     }
-
 }
