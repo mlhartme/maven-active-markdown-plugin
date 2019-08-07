@@ -73,7 +73,6 @@ public class Ronn {
         launcher.arg("--workdir", dir.getAbsolute());
         launcher.arg("mlhartme/active-markdown-ronn:1.0.0");
         launcher.arg("ronn", "--roff");
-        System.out.println("launcher: " + launcher);
         return launcher;
     }
 
