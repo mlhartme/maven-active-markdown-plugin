@@ -1,0 +1,4 @@
+#!/bin/sh
+DIR=$(pwd)
+echo "dir: ${DIR}"
+docker run --rm -i --mount "type=bind,source=${DIR},dst=${DIR}" --workdir ${DIR} contargo.server.lan/cisoops-public/ronn ronn "$@"
