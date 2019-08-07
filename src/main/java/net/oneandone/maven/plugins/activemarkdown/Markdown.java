@@ -113,7 +113,7 @@ public class Markdown {
                 lst.add(p);
             }
         }
-        launcher = dir.launcher("ronn", "--roff");
+        launcher = ronn(dir);
         for (Manpage mp : lst) {
             launcher.arg(mp.file.getName());
         }
@@ -125,6 +125,33 @@ public class Markdown {
             roff.deleteFile();
         }
         return result;
+    }
+
+    private Launcher ronn(FileNode dir) {
+        if (System.getProperty("ronn.local") != null) {
+            return localRonn(dir);
+        } else {
+            return dockerRonn(dir);
+        }
+    }
+
+    private Launcher dockerRonn(FileNode dir) {
+        Launcher launcher;
+
+        launcher = dir.launcher("docker", "run", "--rm", "-i");
+        launcher.arg("--mount", "type=bind,source=" + dir.getAbsolute() + ",dst=" + dir.getAbsolute());
+        launcher.arg("--workdir", dir.getAbsolute());
+        launcher.arg("mlhartme/active-markdown-ronn:1.0.0");
+        launcher.arg("ronn", "--roff");
+        System.out.println("launcher: " + launcher);
+        return launcher;
+    }
+
+    private Launcher localRonn(FileNode dir) {
+        Launcher launcher;
+
+        launcher = dir.launcher("ronn", "--roff");
+        return launcher;
     }
 
     private List<String> synopsis() {

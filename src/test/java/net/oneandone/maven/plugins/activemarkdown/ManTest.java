@@ -30,10 +30,13 @@ public class ManTest {
     public void man() throws IOException {
         FileNode in;
         FileNode file;
+        FileNode work;
 
+        // don't use tmp files, they are not visible to docker on mac os
         in = WORLD.guessProjectHome(getClass()).join("src/test/synopsis.in");
-        file = WORLD.getTemp().createTempFile();
-        file.writeString(in.readString());
-        Markdown.run(file).manpages(WORLD.getTemp().createTempDirectory());
+        work = WORLD.guessProjectHome(getClass()).join("target/man-test").deleteTreeOpt().mkdir();
+        file = work.join("file");
+        in.copyFile(file);
+        Markdown.run(file).manpages(work.join("dir").mkdir());
     }
 }
