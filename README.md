@@ -1,9 +1,9 @@
 # Active Markdown 
 
 This is a Maven Plugin for Markdown files. It provides
-* *actions* that to generate parts of the markdown file
+* *actions* that generate parts of the markdown file
 * *man pages* generation with [https://github.com/rtomayko/ronn](Ronn)
-* error message to dangling references
+* error message for dangling references
 
 
 ## Actions
